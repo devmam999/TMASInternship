@@ -29,17 +29,8 @@ app.add_middleware(
 app.include_router(chat.router, prefix="/api", tags=["chat"])
 
 @app.get("/")
-async def root():
-    """Root endpoint with API information"""
-    return {
-        "message": "AI Study Assistant API",
-        "version": "1.0.0",
-        "subjects": ["AP Calculus", "AP Physics", "AP Chemistry", "AMC Math"],
-        "endpoints": {
-            "chat": "/api/chat",
-            "subjects": "/api/subjects"
-        }
-    }
+def read_root():
+    return {"status": "ok"}
 
 @app.get("/health")
 async def health_check():
