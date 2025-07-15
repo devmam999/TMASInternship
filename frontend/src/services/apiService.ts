@@ -13,13 +13,6 @@ export interface ChatResponse {
   suggestions: string[]
 }
 
-export interface Subject {
-  name: string
-  description: string
-  topics: string[]
-  examples: string[]
-}
-
 export interface MathRequest {
   expression: string
   operation?: string
@@ -76,14 +69,6 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(request),
     })
-  }
-
-  async getSubjects(): Promise<Subject[]> {
-    return this.request<Subject[]>('/api/subjects')
-  }
-
-  async getSubjectDetails(subjectName: string): Promise<Subject> {
-    return this.request<Subject>(`/api/subjects/${encodeURIComponent(subjectName)}`)
   }
 
   // Math solver endpoints

@@ -2,7 +2,6 @@ import React from "react"
 import { useState, useRef, useEffect } from 'react'
 import { Send, Trash2, MessageCircle } from 'lucide-react'
 import { useChat } from '../contexts/ChatContext'
-import { useSubjects } from '../contexts/SubjectContext'
 import { apiService } from '../services/apiService'
 import ChatMessage from '../components/ChatMessage'
 import SuggestionButton from '../components/SuggestionButton'
@@ -12,7 +11,6 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { messages, addMessage, clearMessages, isLoading, setIsLoading } = useChat()
-  const { selectedSubject } = useSubjects()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -94,15 +92,6 @@ export default function ChatPage() {
             <span>Clear Chat</span>
           </button>
         </div>
-
-        {/* Subject Info */}
-        {selectedSubject && (
-          <div className="mb-4 p-3 bg-primary-50 rounded-lg border border-primary-200">
-            <p className="text-sm text-primary-700">
-              <strong>Subject:</strong> {selectedSubject}
-            </p>
-          </div>
-        )}
 
         {/* Chat Messages */}
         <div className="h-96 overflow-y-auto chat-container mb-6 bg-gray-50 dark:bg-gray-900 dark:text-gray-100 rounded-lg transition-colors duration-300">

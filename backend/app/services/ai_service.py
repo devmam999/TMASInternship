@@ -14,7 +14,7 @@ class AIService:
         self.max_tokens = 1000  # More tokens since it's free
         self.temperature = settings.TEMPERATURE
     
-    async def get_response(self, message: str, subject: Optional[str] = None, context: Optional[str] = None) -> str:
+    async def get_response(self, message: str, context: Optional[str] = None) -> str:
         """
         Get AI response for a given message
         """
@@ -25,13 +25,13 @@ class AIService:
         
         if not self.api_key:
             print("❌ No API key found, using fallback")
-            return self._get_fallback_response(message, subject)
+            return self._get_fallback_response(message)
         
         print("✅ API key found, making request to Open Router")
         
         try:
-            # Build system prompt based on subject
-            system_prompt = self._build_system_prompt(subject)
+            # Build system prompt (no subject)
+            system_prompt = self._build_system_prompt()
             
             # Build user message with context
             user_message = self._build_user_message(message, context)
@@ -71,63 +71,21 @@ class AIService:
                         return data["choices"][0]["message"]["content"].strip()
                     else:
                         print(f"❌ Unexpected response format: {data}")
-                        return self._get_fallback_response(message, subject)
+                        return self._get_fallback_response(message)
                 else:
                     print(f"❌ Error response: {response.status_code}")
                     print(f"Response text: {response.text}")
                     print(f"Response headers: {response.headers}")
-                    return self._get_fallback_response(message, subject)
+                    return self._get_fallback_response(message)
                     
         except Exception as e:
             print(f"Error calling Hugging Face API: {e}")
             print(f"Full error details: {type(e).__name__}: {str(e)}")
-            return self._get_fallback_response(message, subject)
+            return self._get_fallback_response(message)
     
-    def _build_system_prompt(self, subject: Optional[str] = None) -> str:
-        """Build system prompt based on subject"""
-        base_prompt = """You are an expert AI tutor specializing in AP Math and Science subjects. 
-        Provide clear, step-by-step explanations with mathematical expressions in LaTeX format.
-        Always show your work and explain the reasoning behind each step.
-        Use proper mathematical notation and include units where applicable."""
-        
-        if subject:
-            subject_prompts = {
-                "AP Calculus": """Focus on AP Calculus topics including:
-                - Derivatives and differentiation rules
-                - Integrals and integration techniques
-                - Limits and continuity
-                - Applications of derivatives and integrals
-                - Series and sequences
-                Use proper calculus notation and show all steps.""",
-                
-                "AP Physics": """Focus on AP Physics topics including:
-                - Kinematics and dynamics
-                - Energy and momentum
-                - Forces and Newton's laws
-                - Basic electricity and magnetism
-                - Wave phenomena
-                Include free-body diagrams when relevant and use proper physics notation.""",
-                
-                "AP Chemistry": """Focus on AP Chemistry topics including:
-                - Stoichiometry and chemical reactions
-                - Atomic structure and periodic trends
-                - Chemical bonding and molecular geometry
-                - Thermodynamics and kinetics
-                - Equilibrium and acid-base chemistry
-                Use proper chemical notation and include balanced equations.""",
-                
-                "AMC Math": """Focus on AMC Math competition topics including:
-                - Algebra and functions
-                - Geometry and trigonometry
-                - Number theory and combinatorics
-                - Probability and statistics
-                - Problem-solving strategies
-                Provide elegant solutions and multiple approaches when possible."""
-            }
-            
-            if subject in subject_prompts:
-                base_prompt += f"\n\n{subject_prompts[subject]}"
-        
+    def _build_system_prompt(self) -> str:
+        """Build system prompt for general math and science tutoring"""
+        base_prompt = """You are an expert AI tutor specializing in AP Math and Science.\nProvide clear, step-by-step explanations with mathematical expressions in LaTeX format.\nAlways show your work and explain the reasoning behind each step.\nUse proper mathematical notation and include units where applicable."""
         return base_prompt
     
     def _build_user_message(self, message: str, context: Optional[str] = None) -> str:
@@ -136,10 +94,9 @@ class AIService:
             return f"Context: {context}\n\nQuestion: {message}"
         return message
     
-    def _get_fallback_response(self, message: str, subject: Optional[str] = None) -> str:
+    def _get_fallback_response(self, message: str) -> str:
         """Fallback response when API is not available"""
-        subject_text = f" for {subject}" if subject else ""
-        return f"I'm here to help you with your {subject_text} question: '{message}'. However, I'm currently in demo mode. Please set up your OpenRouter API key to get full AI-powered responses."
+        return f"I'm here to help you with your question: '{message}'. However, I'm currently in demo mode. Please set up your OpenRouter API key to get full AI-powered responses."
     
     def extract_latex(self, text: str) -> List[str]:
         """Extract LaTeX expressions from text"""
@@ -158,7 +115,7 @@ class AIService:
         
         return list(set(latex_expressions))  # Remove duplicates
     
-    def generate_suggestions(self, message: str, subject: Optional[str] = None) -> List[str]:
+    def generate_suggestions(self, message: str) -> List[str]:
         """Generate follow-up question suggestions"""
         suggestions = []
         

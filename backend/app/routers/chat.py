@@ -5,14 +5,13 @@ import httpx
 import json
 from app.utils.config import settings
 from app.services.ai_service import AIService
-from app.services.subject_service import SubjectService
+# Removed import of SubjectService
 
 router = APIRouter()
 
 # Pydantic models
 class ChatMessage(BaseModel):
     message: str
-    subject: Optional[str] = None
     context: Optional[str] = None
 
 class ChatResponse(BaseModel):
@@ -47,15 +46,9 @@ class WhiteboardResponse(BaseModel):
     shapes: List[Shape]
     description: str
 
-class SubjectInfo(BaseModel):
-    name: str
-    description: str
-    topics: List[str]
-    examples: List[str]
-
 # Initialize services
 ai_service = AIService()
-subject_service = SubjectService()
+# Removed subject_service initialization
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_ai(chat_message: ChatMessage):
@@ -63,16 +56,16 @@ async def chat_with_ai(chat_message: ChatMessage):
     Send a message to the AI assistant and get a response
     """
     try:
+        print("Received /api/chat request:", chat_message)
         # No longer require subject
         # Use context if provided (full conversation)
         response = await ai_service.get_response(
             message=chat_message.message,
-            subject=None,  # subject is now unused
             context=chat_message.context
         )
 
         # Generate follow-up suggestions
-        suggestions = ai_service.generate_suggestions(chat_message.message, None)
+        suggestions = ai_service.generate_suggestions(chat_message.message)
 
         return ChatResponse(
             response=response,
@@ -82,24 +75,10 @@ async def chat_with_ai(chat_message: ChatMessage):
         )
 
     except Exception as e:
+        print("Error in /api/chat:", e)
         raise HTTPException(status_code=500, detail=f"Error processing chat request: {str(e)}")
 
-@router.get("/subjects", response_model=List[SubjectInfo])
-async def get_subjects():
-    """
-    Get list of available subjects with their descriptions and topics
-    """
-    return subject_service.get_subject_info()
-
-@router.get("/subjects/{subject_name}", response_model=SubjectInfo)
-async def get_subject_details(subject_name: str):
-    """
-    Get detailed information about a specific subject
-    """
-    subject_info = subject_service.get_subject_info_by_name(subject_name)
-    if not subject_info:
-        raise HTTPException(status_code=404, detail=f"Subject '{subject_name}' not found")
-    return subject_info
+# Removed /subjects endpoints and subject-related logic
 
 @router.post("/chat/stream")
 async def chat_stream(chat_message: ChatMessage):

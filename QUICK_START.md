@@ -6,7 +6,6 @@ You now have a complete MVP of an AI-powered study assistant with:
 
 ### ✅ Core Features
 - **Intelligent Chat Interface** - Ask questions about AP Math & Science
-- **Subject-Specific Support** - AP Calculus, Physics, Chemistry, AMC Math
 - **Interactive Whiteboard** - Draw diagrams and graphs
 - **Math Solver** - Symbolic mathematics with SymPy
 - **Beautiful UI** - Modern React + Tailwind CSS design
